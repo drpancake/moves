@@ -13,3 +13,8 @@ install:
 script:
   - tox -e \
       $(echo py$TRAVIS_PYTHON_VERSION | tr -d . | sed -e 's/pypypy/pypy/')
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
