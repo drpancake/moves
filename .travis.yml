@@ -2,11 +2,14 @@ language: python
 python:
   - "2.6"
   - "2.7"
-  - "3.2"
+  - "pypy"
   - "3.3"
-# command to install dependencies
-install: "pip install -r requirements.txt"
-# command to run tests
+  - "3.4"
+
+install:
+  - pip install tox
+
+# thx to jinja for this
 script:
-  - python setup.py install
-  - python setup.py test
+  - tox -e \
+      $(echo py$TRAVIS_PYTHON_VERSION | tr -d . | sed -e 's/pypypy/pypy/')
