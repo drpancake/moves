@@ -22,9 +22,9 @@ class MovesClient(object):
     token_url = "https://api.moves-app.com/oauth/v1/access_token"
     tokeninfo_url = "https://api.moves-app.com/oauth/v1/tokeninfo"
     refresh_url = "https://api.moves-app.com/oauth/v1/access_token"
-    
-    
-    
+
+
+
     def __init__(self, client_id=None, client_secret=None,
                  access_token=None, use_app=False):
 
@@ -93,7 +93,7 @@ class MovesClient(object):
             raise MovesAPIError(error)
 
     def tokeninfo(self):
-        
+
         params = {
             'access_token': self.access_token
         }
@@ -129,7 +129,7 @@ class MovesClient(object):
         if 'etag' in params:
             headers['If-None-Match'] = params['etag']
             del(params['etag'])
-        
+
         resp = requests.request(method, url,
                                 data=data,
                                 params=params,
@@ -139,7 +139,7 @@ class MovesClient(object):
                                 resp.status_code, resp.text)
         if resp.status_code == 304:
             raise MovesAPINotModifed("Unmodified")
-        
+
         self._last_headers = resp.headers
         return resp
 
@@ -157,34 +157,28 @@ class MovesClient(object):
             self.first_date = response['profile']['firstDate']
 
     def __getattr__(self, name):
-        '''\
-Turns method calls such as "moves.foo_bar(...)" into
-a call to "moves.api('/foo/bar', 'GET', params={...})"
-and then parses the response.
-'''
+        """
+        Turns method calls such as "moves.foo_bar(...)" into
+        a call to "moves.api('/foo/bar', 'GET', params={...})"
+        and then parses the response.
+        """
         base_path = name.replace('_', '/')
 
-        # Define a function that does what we want.
+        # Define   a function that does what we want.
         def closure(*path, **params):
-            'Accesses the /%s API endpoints.'
+            """Accesses the /%s API endpoints."""
             path = list(path)
             path.insert(0, base_path)
             return self.parse_response(
                 self.api('/'.join(path), 'GET', params=params)
                 )
 
-        # Clone a new method with the correct name and doc string.
-        retval = types.FunctionType(
-            closure.func_code,
-            closure.func_globals,
-            name,
-            closure.func_defaults,
-            closure.func_closure)
-        retval.func_doc =  closure.func_doc % base_path
+        closure.__name__ = name
+        closure.__doc__ = closure.__doc__ % base_path
 
         # Cache it to avoid additional calls to __getattr__.
-        setattr(self, name, retval)
-        return retval
+        setattr(self, name, closure)
+        return closure
 
 # Give Access to last attribute
 _move_client_status = ['etag', 'x-ratelimit-hourlimit', 'x-ratelimit-hourremaining',
@@ -193,4 +187,4 @@ for att in _move_client_status:
     att = att.replace('-', '_')
     setattr(MovesClient, att, property(lambda self,att=att: self._last_headers.get(att, None)
                                        if self._last_headers else att))
-    
+
