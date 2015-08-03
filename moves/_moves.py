@@ -22,9 +22,7 @@ class MovesClient(object):
     token_url = "https://api.moves-app.com/oauth/v1/access_token"
     tokeninfo_url = "https://api.moves-app.com/oauth/v1/tokeninfo"
     refresh_url = "https://api.moves-app.com/oauth/v1/access_token"
-    
-    
-    
+
     def __init__(self, client_id=None, client_secret=None,
                  access_token=None, use_app=False):
 
@@ -93,7 +91,7 @@ class MovesClient(object):
             raise MovesAPIError(error)
 
     def tokeninfo(self):
-        
+
         params = {
             'access_token': self.access_token
         }
@@ -106,7 +104,6 @@ class MovesClient(object):
             error = "<%(error)s>: %(error_description)s" % response
             raise MovesAPIError(error)
 
-
     def api(self, path, method='GET', **kwargs):
 
         params = kwargs['params'] if 'params' in kwargs else {}
@@ -118,7 +115,7 @@ class MovesClient(object):
         url = "%s/%s" % (self.api_url, path)
         if 'access_token' in params:
             access_token = params['access_token']
-            del(params['access_token'])
+            del (params['access_token'])
         else:
             access_token = self.access_token
 
@@ -128,18 +125,21 @@ class MovesClient(object):
 
         if 'etag' in params:
             headers['If-None-Match'] = params['etag']
-            del(params['etag'])
-        
+            del (params['etag'])
+
         resp = requests.request(method, url,
                                 data=data,
                                 params=params,
                                 headers=headers)
         if str(resp.status_code)[0] not in ('2', '3'):
-            raise MovesAPIError("Error returned via the API with status code (%s):" %
-                                resp.status_code, resp.text)
+            movesError = MovesAPIError("Error returned via the API with status code (%s):" %
+                                       resp.status_code, resp.text)
+            movesError.resp = resp.headers
+            raise movesError
+
         if resp.status_code == 304:
             raise MovesAPINotModifed("Unmodified")
-        
+
         self._last_headers = resp.headers
         return resp
 
@@ -171,7 +171,7 @@ and then parses the response.
             path.insert(0, base_path)
             return self.parse_response(
                 self.api('/'.join(path), 'GET', params=params)
-                )
+            )
 
         # Clone a new method with the correct name and doc string.
         retval = types.FunctionType(
@@ -180,7 +180,7 @@ and then parses the response.
             name,
             closure.func_defaults,
             closure.func_closure)
-        retval.func_doc =  closure.func_doc % base_path
+        retval.func_doc = closure.func_doc % base_path
 
         # Cache it to avoid additional calls to __getattr__.
         setattr(self, name, retval)
@@ -191,6 +191,5 @@ _move_client_status = ['etag', 'x-ratelimit-hourlimit', 'x-ratelimit-hourremaini
                        'x-ratelimit-minutelimit', 'x-ratelimit-minuteremaining']
 for att in _move_client_status:
     att = att.replace('-', '_')
-    setattr(MovesClient, att, property(lambda self,att=att: self._last_headers.get(att, None)
-                                       if self._last_headers else att))
-    
+    setattr(MovesClient, att, property(lambda self, att=att: self._last_headers.get(att, None)
+    if self._last_headers else att))
