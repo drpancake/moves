@@ -23,9 +23,19 @@ http://opensource.org/licenses/afl-3.0
 from cmd import Cmd as _Cmd
 from pprint import pprint as _pprint
 import json as _json
+import itertools
+from functools import wraps
+
+import sys
+
+try:
+    from urlparse import urlparse, parse_qs
+except ImportError:
+    from urllib.parse import urlparse, parse_qs
 
 try:
     from moves import MovesClient
+
 except ImportError:
     import sys
     from os.path import join, normpath
@@ -36,8 +46,6 @@ except ImportError:
 
 
 def _parse_line(f):
-    import itertools
-    from functools import wraps
     def partition(pred, iterable,
                   filter=itertools.ifilter,
                   filterfalse=itertools.ifilterfalse,
@@ -61,19 +69,19 @@ class MovesCmd(_Cmd):
     cache_file = 'moves_cli.json'
 
     def default(self, line):
-        '''Echos the arguments and exits the interpreter.'''
-        print(argv)
+        """Echos the arguments and exits the interpreter."""
+        print('argv')
 
     def do_quit(self, line):
-        '''Exits the interpreter.'''
+        """Exits the interpreter."""
         return True
 
     def do_copyright(self, line):
-        '''Displays copyright and licensing information.'''
+        """Displays copyright and licensing information."""
         print(copyright)
 
     def do_client_id(self, line):
-        '''Displays or sets the value.'''
+        """Displays or sets the value."""
         if line:
             self.mc.client_id = line
         elif self.mc.client_id:
@@ -82,7 +90,7 @@ class MovesCmd(_Cmd):
             print('The client id is not set.')
 
     def do_client_secret(self, line):
-        '''Displays or sets the value.'''
+        """Displays or sets the value."""
         if line:
             self.mc.client_secret = line
         elif self.mc.client_secret:
@@ -91,8 +99,8 @@ class MovesCmd(_Cmd):
             print('The client secret is not set.')
 
     def do_access_token(self, line):
-        '''Displays or sets the value.'''
-        from urlparse import urlparse, parse_qs
+        """Displays or sets the value."""
+
         mc = self.mc
         if line:
             parts = urlparse(line)
@@ -110,14 +118,14 @@ class MovesCmd(_Cmd):
             print('use it to re-run this command.')
 
     def do_load(self, filename):
-        '''Loads the API state from a JSON file.'''
+        """Loads the API state from a JSON file."""
         if not filename:
             filename = self.cache_file
         with open(filename, 'rb') as fp:
             self.mc.__dict__.update(_json.load(fp))
 
     def do_save(self, filename):
-        '''Saves the API state into a JSON file.'''
+        """Saves the API state into a JSON file."""
         if not filename:
             filename = self.cache_file
         with open(filename, 'wb') as fp:
@@ -125,34 +133,34 @@ class MovesCmd(_Cmd):
 
     @_parse_line
     def do_get(self, *path, **params):
-        '''Issues an HTTP GET request
-Syntax:
-\tget path... [key=value]...
-'''
+        """Issues an HTTP GET request
+        Syntax:
+        \tget path... [key=value]...
+        """
         _pprint(self.mc.get('/'.join(path), **params))
 
     @_parse_line
     def do_post(self, *path, **params):
-        '''Issues an HTTP POST request
-Syntax:
-\tpost path... [key=value]...
-'''
+        """Issues an HTTP POST request
+        Syntax:
+        \tpost path... [key=value]...
+        """
         _pprint(self.mc.post('/'.join(path), **params))
 
     def do_tokeninfo(self, line):
-        '''Displays information about the access token.'''
+        """Displays information about the access token."""
         _pprint(self.mc.tokeninfo())
 
     def do_examples(self, line):
-        '''Displays example commands.'''
-        print('''\
+        """Displays example commands."""
+        print("""\
 These are some commands to try.
  get user profile
  get user summary daily pastDays=7
  get user activities daily pastDays=5
  get user places daily pastDays=3
  get user storyline daily pastDays=2
-''')
+""")
 
     def onecmd(self, line):
         try:
@@ -169,6 +177,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    import sys
-
     main(sys.argv)

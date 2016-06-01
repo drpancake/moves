@@ -2,14 +2,17 @@
 
 from datetime import datetime
 
-import _keys
+
 from flask import Flask, url_for, request, session, redirect
 
 from moves import MovesClient
 
 app = Flask(__name__)
 
-Moves = MovesClient(_keys.client_id, _keys.client_secret)
+API_CLIENT_ID = '123456789'
+API_CLIENT_SECRET = '123456789'
+
+Moves = MovesClient(API_CLIENT_ID, API_CLIENT_SECRET)
 
 
 @app.route("/")
@@ -53,8 +56,8 @@ def show_info():
 
 @app.route("/today")
 def today():
-    today = datetime.now().strftime('%Y%m%d')
-    info = Moves.user_summary_daily(today, access_token=session['token'])
+    day = datetime.now().strftime('%Y%m%d')
+    info = Moves.user_summary_daily(day, access_token=session['token'])
     res = ''
     for activity in info[0]['summary']:
         if activity['activity'] == 'wlk':
@@ -65,8 +68,6 @@ def today():
             res += 'Cycling: %dm' % activity['distance']
     return res
 
-
-app.secret_key = _keys.secret_key
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
