@@ -117,7 +117,7 @@ class MovesClient(object):
         url = "%s/%s" % (self.api_url, path)
         if 'access_token' in params:
             access_token = params['access_token']
-            del (params['access_token'])
+            del params['access_token']
         else:
             access_token = self.access_token
 
@@ -127,7 +127,7 @@ class MovesClient(object):
 
         if 'etag' in params:
             headers['If-None-Match'] = params['etag']
-            del (params['etag'])
+            del params['etag']
 
         resp = requests.request(method, url,
                                 data=data,
@@ -159,22 +159,24 @@ class MovesClient(object):
             self.first_date = response['profile']['firstDate']
 
     def __getattr__(self, name):
-        '''\
-Turns method calls such as "moves.foo_bar(...)" into
-a call to "moves.api('/foo/bar', 'GET', params={...})"
-and then parses the response.
-'''
+        """
+        Turns method calls such as "moves.foo_bar(...)" into
+        a call to "moves.api('/foo/bar', 'GET', params={...})"
+        and then parses the response.
+        """
         base_path = name.replace('_', '/')
 
-        # Define a function that does what we want.
+        # Define   a function that does what we want.
         def closure(*path, **params):
-            'Accesses the /%s API endpoints.'
+            """Accesses the /%s API endpoints."""
             path = list(path)
             path.insert(0, base_path)
             return self.parse_response(
                 self.api('/'.join(path), 'GET', params=params)
             )
 
+        closure.__name__ = name
+        closure.__doc__ = closure.__doc__ % base_path
         # Clone a new method with the correct name and doc string.
         retval = types.FunctionType(
             closure.func_code,
@@ -185,8 +187,8 @@ and then parses the response.
         retval.func_doc = closure.func_doc % base_path
 
         # Cache it to avoid additional calls to __getattr__.
-        setattr(self, name, retval)
-        return retval
+        setattr(self, name, closure)
+        return closure
 
 # Give Access to last attribute
 _move_client_status = ['etag', 'x-ratelimit-hourlimit', 'x-ratelimit-hourremaining',
@@ -195,3 +197,6 @@ for att in _move_client_status:
     att = att.replace('-', '_')
     setattr(MovesClient, att, property(lambda self, att=att: self._last_headers.get(att, None)
     if self._last_headers else att))
+    setattr(MovesClient, att, property(lambda self,att=att: self._last_headers.get(att, None)
+                                       if self._last_headers else att))
+
