@@ -65,8 +65,7 @@ class MovesClient(object):
 
         if 'redirect_uri' in kwargs:
             params['redirect_uri'] = kwargs['redirect_uri']
-        response = requests.post(self.token_url, params=params)
-        response = json.loads(response.content)
+        response = requests.post(self.token_url, params=params).json()
         try:
             return response['access_token'], response['refresh_token']
         except:
@@ -82,8 +81,7 @@ class MovesClient(object):
             'grant_type': kwargs.get('grant_type', 'refresh_token')
         }
 
-        response = requests.post(self.refresh_url, params=params)
-        response = json.loads(response.content)
+        response = requests.post(self.refresh_url, params=params).json()
         try:
             return response['access_token'], response['refresh_token']
         except:
@@ -96,8 +94,7 @@ class MovesClient(object):
             'access_token': self.access_token
         }
 
-        response = requests.get(self.tokeninfo_url, params=params)
-        response = json.loads(response.content)
+        response = requests.get(self.tokeninfo_url, params=params).json()
         try:
             return response
         except:
