@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import json
 import urllib
+
 import requests
-import types
 
 
 class MovesAPIError(Exception):
@@ -117,7 +115,7 @@ class MovesClient(object):
         url = "%s/%s" % (self.api_url, path)
         if 'access_token' in params:
             access_token = params['access_token']
-            del params['access_token']
+            del (params['access_token'])
         else:
             access_token = self.access_token
 
@@ -127,18 +125,16 @@ class MovesClient(object):
 
         if 'etag' in params:
             headers['If-None-Match'] = params['etag']
-            del params['etag']
+            del (params['etag'])
 
         resp = requests.request(method, url,
                                 data=data,
                                 params=params,
                                 headers=headers)
         if str(resp.status_code)[0] not in ('2', '3'):
-            movesError = MovesAPIError("Error returned via the API with status code (%s):" %
-                                       resp.status_code, resp.text)
-            movesError.resp = resp.headers
-            raise movesError
-
+            raise MovesAPIError(
+                "Error returned via the API with status code (%s):" %
+                resp.status_code, resp.text)
         if resp.status_code == 304:
             raise MovesAPINotModifed("Unmodified")
 
@@ -177,26 +173,18 @@ class MovesClient(object):
 
         closure.__name__ = name
         closure.__doc__ = closure.__doc__ % base_path
-        # Clone a new method with the correct name and doc string.
-        retval = types.FunctionType(
-            closure.func_code,
-            closure.func_globals,
-            name,
-            closure.func_defaults,
-            closure.func_closure)
-        retval.func_doc = closure.func_doc % base_path
 
         # Cache it to avoid additional calls to __getattr__.
         setattr(self, name, closure)
         return closure
 
+
 # Give Access to last attribute
-_move_client_status = ['etag', 'x-ratelimit-hourlimit', 'x-ratelimit-hourremaining',
+_move_client_status = ['etag', 'x-ratelimit-hourlimit',
+                       'x-ratelimit-hourremaining',
                        'x-ratelimit-minutelimit', 'x-ratelimit-minuteremaining']
 for att in _move_client_status:
     att = att.replace('-', '_')
-    setattr(MovesClient, att, property(lambda self, att=att: self._last_headers.get(att, None)
-    if self._last_headers else att))
-    setattr(MovesClient, att, property(lambda self,att=att: self._last_headers.get(att, None)
-                                       if self._last_headers else att))
-
+    setattr(MovesClient, att,
+            property(lambda self, att=att: self._last_headers.get(att, None)
+            if self._last_headers else att))

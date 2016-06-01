@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 """\
 This implements a command line interpreter (CLI) for the moves API.
 
@@ -27,10 +29,11 @@ try:
 except ImportError:
     import sys
     from os.path import join, normpath
+
     # Try looking in the parent of this script's directory.
     sys.path.insert(0, normpath(join(sys.path[0], '..')))
     from moves import MovesClient
-    
+
 
 def _parse_line(f):
     import itertools
@@ -50,15 +53,16 @@ def _parse_line(f):
             line.split())
         kwds = dict(item.split('=') for item in kwds)
         return f(self, *args, **kwds)
+
     return wrapper
 
-class MovesCmd(_Cmd):
 
+class MovesCmd(_Cmd):
     cache_file = 'moves_cli.json'
 
     def default(self, line):
         '''Echos the arguments and exits the interpreter.'''
-        print `argv`
+        print(argv)
 
     def do_quit(self, line):
         '''Exits the interpreter.'''
@@ -66,25 +70,25 @@ class MovesCmd(_Cmd):
 
     def do_copyright(self, line):
         '''Displays copyright and licensing information.'''
-        print copyright
+        print(copyright)
 
     def do_client_id(self, line):
         '''Displays or sets the value.'''
         if line:
             self.mc.client_id = line
         elif self.mc.client_id:
-            print 'client_id =', self.mc.client_id
+            print('client_id =', self.mc.client_id)
         else:
-            print 'The client id is not set.'
+            print('The client id is not set.')
 
     def do_client_secret(self, line):
         '''Displays or sets the value.'''
         if line:
             self.mc.client_secret = line
         elif self.mc.client_secret:
-            print 'client_secret =', self.mc.client_secret
+            print('client_secret =', self.mc.client_secret)
         else:
-            print 'The client secret is not set.'
+            print('The client secret is not set.')
 
     def do_access_token(self, line):
         '''Displays or sets the value.'''
@@ -96,13 +100,14 @@ class MovesCmd(_Cmd):
             mc.access_token = mc.get_oauth_token(code)
             mc.access_token = line
         elif mc.access_token:
-            print 'access_token =', mc.access_token
+            print('access_token =', mc.access_token)
         else:
-            print 'The access token is not set.'
-            print 'Enter the URL below in a web browser and follow the instructions.'
-            print ' ', mc.build_oauth_url()
-            print 'Once the web browser redirects, copy the complete URL and'
-            print 'use it to re-run this command.'
+            print('The access token is not set.')
+            print(
+                'Enter the URL below in a web browser and follow the instructions.')
+            print(' ', mc.build_oauth_url())
+            print('Once the web browser redirects, copy the complete URL and')
+            print('use it to re-run this command.')
 
     def do_load(self, filename):
         '''Loads the API state from a JSON file.'''
@@ -140,28 +145,30 @@ Syntax:
 
     def do_examples(self, line):
         '''Displays example commands.'''
-        print '''\
+        print('''\
 These are some commands to try.
  get user profile
  get user summary daily pastDays=7
  get user activities daily pastDays=5
  get user places daily pastDays=3
  get user storyline daily pastDays=2
-'''
+''')
 
     def onecmd(self, line):
         try:
             return _Cmd.onecmd(self, line)
         except Exception as error:
-            print "%s: %s" % (type(error).__name__, error)
+            print("%s: %s" % (type(error).__name__, error))
 
     def preloop(self):
         self.mc = MovesClient()
 
+
 def main(argv):
     MovesCmd().cmdloop()
 
+
 if __name__ == '__main__':
     import sys
+
     main(sys.argv)
-    

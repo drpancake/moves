@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, url_for, request, session, redirect
-from moves import MovesClient
-from datetime import datetime, timedelta
+from datetime import datetime
+
 import _keys
+from flask import Flask, url_for, request, session, redirect
+
+from moves import MovesClient
 
 app = Flask(__name__)
 
 Moves = MovesClient(_keys.client_id, _keys.client_secret)
+
 
 @app.route("/")
 def index():
@@ -15,7 +18,7 @@ def index():
         oauth_return_url = url_for('oauth_return', _external=True)
         auth_url = Moves.build_oauth_url(oauth_return_url)
         return 'Authorize this application: <a href="%s">%s</a>' % \
-            (auth_url, auth_url)
+               (auth_url, auth_url)
     return redirect(url_for('show_info'))
 
 
@@ -34,7 +37,7 @@ def oauth_return():
 @app.route('/logout')
 def logout():
     if 'token' in session:
-        del(session['token'])
+        del (session['token'])
     return redirect(url_for('index'))
 
 
@@ -42,9 +45,10 @@ def logout():
 def show_info():
     profile = Moves.user_profile(access_token=session['token'])
     response = 'User ID: %s<br />First day using Moves: %s' % \
-        (profile['userId'], profile['profile']['firstDate'])
-    return response + "<br /><a href=\"%s\">Info for today</a>" % url_for('today') + \
-        "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
+               (profile['userId'], profile['profile']['firstDate'])
+    return response + "<br /><a href=\"%s\">Info for today</a>" % url_for(
+        'today') + \
+           "<br /><a href=\"%s\">Logout</a>" % url_for('logout')
 
 
 @app.route("/today")
@@ -127,7 +131,8 @@ def places():
 @app.route("/storyline")
 def storyline():
     today = datetime.now().strftime('%Y%m%d')
-    info = Moves.user_storyline_daily(today, trackPoints={'true'}, access_token=session['token'])
+    info = Moves.user_storyline_daily(today, trackPoints={'true'},
+                                      access_token=session['token'])
     res = ''
     for segment in info[0]['segments']:
         if segment['type'] == 'place':
@@ -202,6 +207,7 @@ def move(segment, res):
         res = activities_block(activity, res)
     res += '<br />'
     return res
+
 
 app.secret_key = _keys.secret_key
 
