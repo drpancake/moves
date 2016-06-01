@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='moves',
-      version='0.1',
+      version='0.2',
       description='Moves Client API',
       author='Derek Arnold',
       author_email='derek@derekarnold.net',
