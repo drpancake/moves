@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask import Flask, url_for, request, session, redirect
 from moves import MovesClient
 from datetime import datetime, timedelta

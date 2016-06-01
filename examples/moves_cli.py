@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """\
 This implements a command line interpreter (CLI) for the moves API.
 
