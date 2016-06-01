@@ -14,8 +14,11 @@ def main():
     )
 
     access_token, refresh_token = api.refresh_oauth_token(refresh_token)
-
     print(access_token, refresh_token)
+    api.access_token = access_token
+    info = api.tokeninfo()
+
+    print(info)
 
 if __name__ == '__main__':
     main()

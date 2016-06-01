@@ -68,7 +68,9 @@ class MovesClient(object):
         response = requests.post(self.token_url, params=params).json()
         try:
             return response['access_token'], response['refresh_token']
-        except:
+        except KeyError as e:
+            if 'error_description' not in response:
+                response['error_description'] = str(e)
             error = "<%(error)s>: %(error_description)s" % response
             raise MovesAPIError(error)
 
@@ -84,7 +86,9 @@ class MovesClient(object):
         response = requests.post(self.refresh_url, params=params).json()
         try:
             return response['access_token'], response['refresh_token']
-        except:
+        except KeyError as e:
+            if 'error_description' not in response:
+                response['error_description'] = str(e)
             error = "<%(error)s>: %(error_description)s" % response
             raise MovesAPIError(error)
 
@@ -97,7 +101,9 @@ class MovesClient(object):
         response = requests.get(self.tokeninfo_url, params=params).json()
         try:
             return response
-        except:
+        except KeyError as e:
+            if 'error_description' not in response:
+                response['error_description'] = str(e)
             error = "<%(error)s>: %(error_description)s" % response
             raise MovesAPIError(error)
 
