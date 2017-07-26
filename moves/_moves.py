@@ -1,5 +1,5 @@
 import json
-import urllib
+from urllib.parse import urlencode
 
 import requests
 
@@ -10,7 +10,10 @@ class MovesAPIError(Exception):
 
 
 class MovesAPINotModifed(Exception):
-    """Raised if the document requested is unmodified. Need the use of etag header"""
+    """
+    Raised if the document requested is unmodified. Need the use of etag
+    header.
+    """
     pass
 
 
@@ -51,7 +54,7 @@ class MovesClient(object):
             params['redirect_uri'] = redirect_uri
 
         # Moves hates +s for spaces, so use %20 instead.
-        encoded = urllib.urlencode(params).replace('+', '%20')
+        encoded = urlencode(params).replace('+', '%20')
         return "%s?%s" % (self.auth_url, encoded)
 
     def get_oauth_token(self, code, **kwargs):
@@ -183,9 +186,13 @@ class MovesClient(object):
 
 
 # Give Access to last attribute
-_move_client_status = ['etag', 'x-ratelimit-hourlimit',
-                       'x-ratelimit-hourremaining',
-                       'x-ratelimit-minutelimit', 'x-ratelimit-minuteremaining']
+_move_client_status = [
+    'etag',
+    'x-ratelimit-hourlimit',
+    'x-ratelimit-hourremaining',
+    'x-ratelimit-minutelimit',
+    'x-ratelimit-minuteremaining'
+]
 for att in _move_client_status:
     att = att.replace('-', '_')
     setattr(MovesClient, att,
